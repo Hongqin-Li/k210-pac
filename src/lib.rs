@@ -24,6 +24,9 @@ extern crate riscv_rt;
 extern crate vcell;
 use core::marker::PhantomData;
 use core::ops::Deref;
+
+pub const KERNBASE: usize = 0xFFFF_FFFF_0000_0000;
+
 #[doc(hidden)]
 pub mod interrupt {
     #[doc = r"Enumeration of all the interrupts"]
@@ -542,7 +545,7 @@ impl CLINT {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const clint::RegisterBlock {
-        0x0200_0000 as *const _
+        (KERNBASE + 0x0200_0000) as *const _
     }
 }
 impl Deref for CLINT {
@@ -1033,7 +1036,7 @@ impl UARTHS {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const uarths::RegisterBlock {
-        0x3800_0000 as *const _
+        (KERNBASE + 0x3800_0000) as *const _
     }
 }
 impl Deref for UARTHS {
@@ -10357,7 +10360,7 @@ impl FFT {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const fft::RegisterBlock {
-        0x4200_0000 as *const _
+        (KERNBASE + 0x4200_0000) as *const _
     }
 }
 impl Deref for FFT {
@@ -11344,7 +11347,7 @@ impl DMAC {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const dmac::RegisterBlock {
-        0x5000_0000 as *const _
+        (KERNBASE + 0x5000_0000) as *const _
     }
 }
 impl Deref for DMAC {
@@ -21359,7 +21362,7 @@ impl SPI1 {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const spi0::RegisterBlock {
-        0x5300_0000 as *const _
+        (KERNBASE + 0x5300_0000) as *const _
     }
 }
 impl Deref for SPI1 {
@@ -21378,7 +21381,7 @@ impl SPI2 {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const spi2::RegisterBlock {
-        0x5024_0000 as *const _
+        (KERNBASE + 0x5024_0000) as *const _
     }
 }
 impl Deref for SPI2 {
@@ -21432,7 +21435,7 @@ impl SPI3 {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const spi3::RegisterBlock {
-        0x5400_0000 as *const _
+        (KERNBASE + 0x5400_0000) as *const _
     }
 }
 impl Deref for SPI3 {
@@ -27025,7 +27028,7 @@ impl I2S1 {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const i2s0::RegisterBlock {
-        0x5026_0000 as *const _
+        (KERNBASE + 0x5026_0000) as *const _
     }
 }
 impl Deref for I2S1 {
@@ -27044,7 +27047,7 @@ impl I2S2 {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const i2s0::RegisterBlock {
-        0x5027_0000 as *const _
+        (KERNBASE + 0x5027_0000) as *const _
     }
 }
 impl Deref for I2S2 {
@@ -27063,7 +27066,7 @@ impl I2C0 {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const i2c0::RegisterBlock {
-        0x5028_0000 as *const _
+        (KERNBASE + 0x5028_0000) as *const _
     }
 }
 impl Deref for I2C0 {
@@ -30785,7 +30788,7 @@ impl I2C1 {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const i2c0::RegisterBlock {
-        0x5029_0000 as *const _
+        (KERNBASE + 0x5029_0000) as *const _
     }
 }
 impl Deref for I2C1 {
@@ -33593,7 +33596,7 @@ impl WDT1 {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const wdt0::RegisterBlock {
-        0x5041_0000 as *const _
+        (KERNBASE + 0x5041_0000) as *const _
     }
 }
 impl Deref for WDT1 {
@@ -33612,7 +33615,7 @@ impl OTP {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const otp::RegisterBlock {
-        0x5042_0000 as *const _
+        (KERNBASE + 0x5042_0000) as *const _
     }
 }
 impl Deref for OTP {
@@ -43175,7 +43178,7 @@ impl AES {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const aes::RegisterBlock {
-        0x5045_0000 as *const _
+        (KERNBASE + 0x5045_0000) as *const _
     }
 }
 impl Deref for AES {
@@ -44838,7 +44841,7 @@ impl RTC {
     #[doc = r"Returns a pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const rtc::RegisterBlock {
-        0x5046_0000 as *const _
+        (KERNBASE + 0x5046_0000) as *const _
     }
 }
 impl Deref for RTC {
@@ -46009,13 +46012,14 @@ impl Peripherals {
     #[doc = r"Returns all the peripherals *once*"]
     #[inline]
     pub fn take() -> Option<Self> {
-        riscv::interrupt::free(|_| {
-            if unsafe { DEVICE_PERIPHERALS } {
-                None
-            } else {
-                Some(unsafe { Peripherals::steal() })
-            }
-        })
+        unsafe { Peripherals::steal() }
+        // riscv::interrupt::free(|_| {
+        //     if unsafe { DEVICE_PERIPHERALS } {
+        //         None
+        //     } else {
+        //         Some(unsafe { Peripherals::steal() })
+        //     }
+        // })
     }
     #[doc = r"Unchecked version of `Peripherals::take`"]
     #[inline]
