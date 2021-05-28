@@ -25,6 +25,7 @@ extern crate vcell;
 use core::marker::PhantomData;
 use core::ops::Deref;
 
+/// Offset from phyical address.
 pub const KERNBASE: usize = 0xFFFF_FFFF_0000_0000;
 
 #[doc(hidden)]
@@ -46012,7 +46013,7 @@ impl Peripherals {
     #[doc = r"Returns all the peripherals *once*"]
     #[inline]
     pub fn take() -> Option<Self> {
-        unsafe { Peripherals::steal() }
+        unimplemented!();
         // riscv::interrupt::free(|_| {
         //     if unsafe { DEVICE_PERIPHERALS } {
         //         None
